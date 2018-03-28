@@ -5,3 +5,6 @@
 *.suo
 *.db
 *.opendb
+*.ipch
+/wuziqi/Debug
+/wuziqi/wuziqi/Debug

@@ -20,7 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{8BB1B121-7FA1-4C79-BAD7-BBDB206C5C05}</ProjectGuid>
+    <ProjectGuid>{A1A42C5D-BE2C-47E3-AA8E-6F947746F02F}</ProjectGuid>
     <RootNamespace>wuziqi</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -115,7 +115,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="wuziqi.h" />
+    <ClCompile Include="wuziqi.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
