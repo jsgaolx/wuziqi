@@ -1,25 +1,26 @@
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <conio.h>
 #include <string.h>
 #include <malloc.h>
 
-struct rcd;//声明节点结构
-typedef struct rcd* Record;//节点指针别名
-typedef struct rcd record;//节点别名
-#define MAXIMUS 15 //定义棋盘大小
+struct rcd;						//声明节点结构
+typedef struct rcd* Record;		//节点指针别名
+typedef struct rcd record;		//节点别名
+#define MAXIMUS 15				//定义棋盘大小
 
-int p[MAXIMUS][MAXIMUS];//存储对局信息
-char buff[MAXIMUS * 2 + 1][MAXIMUS * 4 + 3];//输出缓冲器
-int Cx, Cy;//当前光标位置
-int Now;//当前走子的玩家，1代表黑，2代表白
-int wl, wp;//当前写入缓冲器的列数和行数位置
-const char* showText;//在棋盘中央显示的文字信息
-int count;//回合数
-int Putable;//指示当前是否可以走棋
-int Exiting;//1为当场上无子并按ESC时询问是否退出程序的状态，2为非此状态
-int ExiRep;//1为当回放到最后一回合并按向后时询问是否退出回放的状态，2为非此状态
-Record RecBeg, RecNow;//记录的开始节点和当前节点
+int p[MAXIMUS][MAXIMUS];		//存储对局信息
+char buff[MAXIMUS * 2 + 1][MAXIMUS * 6];//输出缓冲器15*4 = 60 63 
+int Cx, Cy;						//当前光标位置
+int Now;						//当前走子的玩家，1代表黑，2代表白
+int wl, wp;						//当前写入缓冲器的列数和行数位置
+const char* showText;			//在棋盘中央显示的文字信息
+int count;						//回合数
+int Putable;					//指示当前是否可以走棋
+int Exiting;					//1为当场上无子并按ESC时询问是否退出程序的状态，2为非此状态
+int ExiRep;						//1为当回放到最后一回合并按向后时询问是否退出回放的状态，2为非此状态
+Record RecBeg, RecNow;			//记录的开始节点和当前节点
 
 struct rcd//记录节点结构,双链表形式
 {
@@ -103,6 +104,7 @@ void CleanRecord()//清理所有记录
 
 char* Copy(char* strDest, const char* strSrc)//修改过的字符串复制函数，会忽略末端的\0
 {
+	//*strDest++;
 	char* strDestCopy = strDest;
 	while (*strSrc != '\0')
 	{
@@ -119,9 +121,9 @@ void Initialize()//初始化一个对局函数
 	count = 0;//回合数归零
 	RecNow = RecBeg = newRecord();
 	Exiting = 0;
-	for (i = 0; i<MAXIMUS; i++)//重置对局数据
+	for (i = 0; i < MAXIMUS; i++)//重置对局数据
 	{
-		for (j = 0; j<MAXIMUS; j++)
+		for (j = 0; j < MAXIMUS; j++)
 		{
 			p[i][j] = 0;
 		}
@@ -133,26 +135,26 @@ void Initialize()//初始化一个对局函数
 const char* getStyle(int i, int j)//获得棋盘中指定坐标交点位置的字符，通过制表符拼成棋盘
 {
 	if (p[i][j] == 1)//1为黑子
-		return "●";
+		return "╳ ";
 	else if (p[i][j] == 2)//2为白子
-		return "○";
+		return "╭ ";
 	else if (i == 0 && j == 0)//以下为边缘棋盘样式
-		return "┏";
+		return "┏ ";
 	else if (i == MAXIMUS - 1 && j == 0)
-		return "┓";
+		return "┓ ";
 	else if (i == MAXIMUS - 1 && j == MAXIMUS - 1)
-		return "┛";
+		return "┛ ";
 	else if (i == 0 && j == MAXIMUS - 1)
-		return "┗";
+		return "┗ ";
 	else if (i == 0)
-		return "┠";
+		return "┠ ";
 	else if (i == MAXIMUS - 1)
-		return "┨";
+		return "┨ ";
 	else if (j == 0)
-		return "┯";
+		return "┯ ";
 	else if (j == MAXIMUS - 1)
-		return "┷";
-	return "┼";//中间的空位
+		return "┷ ";
+	return "┼ ";//中间的空位
 }
 
 const char* getCurse(int i, int j) {//获得指定坐标交点位置左上格的样式，通过制表符来模拟光标的显示
@@ -160,32 +162,32 @@ const char* getCurse(int i, int j) {//获得指定坐标交点位置左上格的样式，通过制表
 	{
 		if (i == Cx) {
 			if (j == Cy)
-				return "┏";
+				return "┏ ";
 			else if (j == Cy + 1)
-				return "┗";
+				return "┗ ";
 		}
 		else if (i == Cx + 1)
 		{
 			if (j == Cy)
-				return "┓";
+				return "┓ ";
 			else if (j == Cy + 1)
-				return "┛";
+				return "┛ ";
 		}
 	}
 	else//不可走棋时光标为虚线
 	{
 		if (i == Cx) {
 			if (j == Cy)
-				return "┌";
+				return "┌ ";
 			else if (j == Cy + 1)
-				return "└";
+				return "└ ";
 		}
 		else if (i == Cx + 1)
 		{
 			if (j == Cy)
-				return "┐";
+				return "┐ ";
 			else if (j == Cy + 1)
-				return "┘";
+				return "┘ ";
 		}
 	}
 	return "　";//如果不在光标附近则为空
@@ -193,8 +195,8 @@ const char* getCurse(int i, int j) {//获得指定坐标交点位置左上格的样式，通过制表
 
 void write(const char* c)//向缓冲器写入字符串
 {
-	Copy(buff[wl] + wp, c);
-	wp += strlen(c);
+   	Copy(buff[wl] + wp, c);
+	wp += (strlen(c));
 }
 
 void ln()//缓冲器写入位置提行
@@ -205,21 +207,24 @@ void ln()//缓冲器写入位置提行
 
 void Display()//将缓冲器内容输出到屏幕
 {
-	int i, l = strlen(showText);//循环变量，中间文字信息的长度
-	int Offset = MAXIMUS * 2 + 2 - l / 2;//算出中间文字信息居中显示所在的横坐标位置
+	int i, len = strlen(showText);//循环变量，中间文字信息的长度
+	int Offset = MAXIMUS * 2 + 2 - (len / 2);//算出中间文字信息居中显示所在的横坐标位置
 	if (Offset % 2 == 1)//如果位置为奇数，则移动到偶数，避免混乱
 	{
 		Offset--;
 	}
 	Copy(buff[MAXIMUS] + Offset, showText);//讲中间文字信息复制到缓冲器
-	if (l % 2 == 1)//如果中间文字长度为半角奇数，则补上空格，避免混乱
+	if (len % 2 == 1)//如果中间文字长度为半角奇数，则补上空格，避免混乱
 	{
-		*(buff[MAXIMUS] + Offset + l) = 0x20;
+		*(buff[MAXIMUS] + Offset + len) = 0x20;
 	}
 	system("cls");//清理屏幕，准备写入
-	for (i = 0; i<MAXIMUS * 2 + 1; i++) {//循环写入每一行
+	for (i = 0; i < MAXIMUS * 2 + 1; i++) 
+	{
+		//循环写入每一行
+		//buff[i][MAXIMUS * 6+2] = '\0';
 		printf("%s", buff[i]);
-		if (i<MAXIMUS * 2)//写入完每一行需要换行
+		if (i < MAXIMUS * 2)//写入完每一行需要换行
 			printf("\n");
 	}
 }
@@ -237,14 +242,24 @@ void Print()//将整个棋盘算出并储存到缓冲器，然后调用Display函数显示出来
 			if (j == 0 || j == MAXIMUS)//如果是棋上下盘边缘则没有连接的竖线，用空格填充位置
 			{
 				if (i != MAXIMUS)
-					write("　");
+				{
+					write(" 　");
+				}
 			}
 			else//如果在棋盘中间则用竖线承接上下
 			{
-				if (i == 0 || i == MAXIMUS - 1)//左右边缘的竖线更粗
+				if (i == 0 )//左右边缘的竖线更粗
+				{
+					write("┃ ");
+				}
+				else if (i == MAXIMUS - 1)
+				{
 					write("┃");
+				}
 				else if (i != MAXIMUS)//中间的竖线
-					write("│");
+				{
+					write("│ ");
+				}
 			}
 		}
 		if (j == MAXIMUS)//如果是最后一次循环，则只需要处理边侧字符，交点要少一排
@@ -253,18 +268,18 @@ void Print()//将整个棋盘算出并储存到缓冲器，然后调用Display函数显示出来
 		}
 		ln();//提行开始打印交点内容
 		write("　");//用空位补齐位置
-		for (i = 0; i<MAXIMUS; i++)//按横坐标循环正常的次数
+		for (i = 0; i < MAXIMUS; i++)//按横坐标循环正常的次数
 		{
 			write(getStyle(i, j));//写入交点字符
 			if (i != MAXIMUS - 1)//如果不在最右侧则补充一个横线承接左右
 			{
 				if (j == 0 || j == MAXIMUS - 1)
-				{
-					write("━");//上下边缘的横线更粗
+				{	
+					write("━ ");//上下边缘的横线更粗
 				}
 				else
 				{
-					write("─");//中间的横线
+					write("─ ");//中间的横线
 				}
 			}
 		}
@@ -289,21 +304,22 @@ int Put() {//在当前光标位置走子，如果非空，则返回0表示失败
 int Check()//胜负检查，即判断当前走子位置有没有造成五连珠的情况
 {
 	int w = 1, x = 1, y = 1, z = 1, i;//累计横竖正斜反邪四个方向的连续相同棋子数目
-	for (i = 1; i<5; i++)if (Cy + i<MAXIMUS&&p[Cx][Cy + i] == Now)w++; else break;//向下检查
-	for (i = 1; i<5; i++)if (Cy - i>0 && p[Cx][Cy - i] == Now)w++; else break;//向上检查
+	for (i = 1; i < 5; i++)if (Cy + i < MAXIMUS&&p[Cx][Cy + i] == Now)w++; else break;//向下检查
+	for (i = 1; i < 5; i++)if (Cy - i > 0 && p[Cx][Cy - i] == Now)w++; else break;//向上检查
 	if (w >= 5)return Now;//若果达到5个则判断当前走子玩家为赢家
-	for (i = 1; i<5; i++)if (Cx + i<MAXIMUS&&p[Cx + i][Cy] == Now)x++; else break;//向右检查
-	for (i = 1; i<5; i++)if (Cx - i>0 && p[Cx - i][Cy] == Now)x++; else break;//向左检查
+	for (i = 1; i < 5; i++)if (Cx + i < MAXIMUS&&p[Cx + i][Cy] == Now)x++; else break;//向右检查
+	for (i = 1; i < 5; i++)if (Cx - i > 0 && p[Cx - i][Cy] == Now)x++; else break;//向左检查
 	if (x >= 5)return Now;//若果达到5个则判断当前走子玩家为赢家
-	for (i = 1; i<5; i++)if (Cx + i<MAXIMUS&&Cy + i<MAXIMUS&&p[Cx + i][Cy + i] == Now)y++; else break;//向右下检查
-	for (i = 1; i<5; i++)if (Cx - i>0 && Cy - i>0 && p[Cx - i][Cy - i] == Now)y++; else break;//向左上检查
+	for (i = 1; i < 5; i++)if (Cx + i < MAXIMUS&&Cy + i < MAXIMUS&&p[Cx + i][Cy + i] == Now)y++; else break;//向右下检查
+	for (i = 1; i < 5; i++)if (Cx - i > 0 && Cy - i > 0 && p[Cx - i][Cy - i] == Now)y++; else break;//向左上检查
 	if (y >= 5)return Now;//若果达到5个则判断当前走子玩家为赢家
-	for (i = 1; i<5; i++)if (Cx + i<MAXIMUS&&Cy - i>0 && p[Cx + i][Cy - i] == Now)z++; else break;//向右上检查
-	for (i = 1; i<5; i++)if (Cx - i>0 && Cy + i<MAXIMUS&&p[Cx - i][Cy + i] == Now)z++; else break;//向左下检查
+	for (i = 1; i < 5; i++)if (Cx + i < MAXIMUS&&Cy - i>0 && p[Cx + i][Cy - i] == Now)z++; else break;//向右上检查
+	for (i = 1; i < 5; i++)if (Cx - i > 0 && Cy + i < MAXIMUS&&p[Cx - i][Cy + i] == Now)z++; else break;//向左下检查
 	if (z >= 5)return Now;//若果达到5个则判断当前走子玩家为赢家
 	return 0;//若没有检查到五连珠，则返回0表示还没有玩家达成胜利
 }
-void ReplayMode() {
+void ReplayMode()
+{
 	int i, j;//循环变量
 	system("title 回放中(按左键后退，右键或空格前进)，Esc退出");
 	showText = "";//重置显示信息
@@ -312,9 +328,9 @@ void ReplayMode() {
 	RecBeg->Back = newRecord();
 	RecBeg->Back->Next = RecBeg;
 	RecBeg = RecBeg->Back;
-	for (i = 0; i<MAXIMUS; i++)//重置对局数据
+	for (i = 0; i < MAXIMUS; i++)//重置对局数据
 	{
-		for (j = 0; j<MAXIMUS; j++)
+		for (j = 0; j < MAXIMUS; j++)
 		{
 			p[i][j] = 0;
 		}
@@ -517,10 +533,10 @@ int RunGame()//进行整个对局，返回赢家信息(虽然有用上)
 				Cy++;
 				break;
 			}
-			if (Cx<0)Cx = MAXIMUS - 1;//如果光标位置越界则移动到对侧
-			if (Cy<0)Cy = MAXIMUS - 1;
-			if (Cx>MAXIMUS - 1)Cx = 0;
-			if (Cy>MAXIMUS - 1)Cy = 0;
+			if (Cx < 0)Cx = MAXIMUS - 1;//如果光标位置越界则移动到对侧
+			if (Cy < 0)Cy = MAXIMUS - 1;
+			if (Cx > MAXIMUS - 1)Cx = 0;
+			if (Cy > MAXIMUS - 1)Cy = 0;
 		}
 		Exiting = 0;//未再次按下ESC则不准备退出
 		showText = "";
@@ -530,7 +546,9 @@ int RunGame()//进行整个对局，返回赢家信息(虽然有用上)
 int main()//主函数
 {
 	system("mode con cols=63 lines=32");//设置窗口大小
-	system("color E0");//设置颜色
+	system("color E1");//设置颜色
+	printf("　● ● ●─ ●○─▆▇ s╳─ ●─ ●─ ○─ ●─ ●─ ○─ ●─ ○─ ●─ ○─ ●─ ○ ");
+	_getch();
 	while (1) {//循环执行游戏
 		RunGame();
 	}
